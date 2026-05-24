@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Service pour le backend (si vous avez un backend Node.js)
+  backend:
+    build: ./luma-backend  # ou le chemin vers votre backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+    volumes:
+      - ./luma-backend:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb  # si vous utilisez MongoDB
+      - postgres # si vous utilisez PostgreSQL
+
+  # Service pour le frontend React
+  frontend:
+    build: ./luma-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./luma-frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+  # Base de données MongoDB (optionnel)
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # Base de données PostgreSQL (optionnel)
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=luma_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  mongodb_data:
+  postgres_data:
